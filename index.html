@@ -1,0 +1,2673 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FisioHRU · Dimensionamento</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --verde: #006633;
+  --verde-mid: #008040;
+  --verde-light: #00a050;
+  --verde-glow: #33cc77;
+  --verde-pale: #e6f5ec;
+  --cream: #f5f7f5;
+  --cream-dark: #e0e8e2;
+  --texto: #1a2a1e;
+  --texto-soft: #4a6050;
+  --branco: #ffffff;
+  --erro: #c0392b;
+  --alerta: #e67e22;
+  --ok: #006633;
+  --azul: #1565c0;
+  --radius: 18px;
+  --radius-sm: 12px;
+  --shadow: 0 4px 20px rgba(0,102,51,0.12);
+  --shadow-lg: 0 8px 40px rgba(0,102,51,0.18);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Sora', sans-serif;
+  background: var(--cream);
+  color: var(--texto);
+  min-height: 100vh;
+  padding-bottom: 60px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+
+
+/* HEADER */
+.header {
+  background: var(--verde);
+  padding: 16px 20px 32px;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+}
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: -22px; left: 0; right: 0;
+  height: 44px;
+  background: var(--cream);
+  border-radius: 50% 50% 0 0 / 44px 44px 0 0;
+}
+.header-inner { position: relative; z-index: 2; }
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.logo-area { display: flex; align-items: center; gap: 10px; }
+.logo-cross {
+  width: 32px; height: 32px;
+  background: var(--branco);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.logo-text {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: rgba(255,255,255,0.85);
+  text-transform: uppercase;
+  line-height: 1.3;
+}
+.turno-badge {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.06em;
+}
+.header-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--branco);
+  line-height: 1.1;
+}
+.header-date {
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 3px;
+  font-family: 'DM Mono', monospace;
+}
+.header-user {
+  font-size: 11px;
+  color: rgba(255,255,255,0.75);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.user-dot {
+  width: 6px; height: 6px;
+  background: var(--verde-glow);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* VIEWS */
+.view { display: none; padding: 28px 16px 0; position: relative; z-index: 1; }
+.view.active { display: block; }
+
+/* CARD */
+.card {
+  background: var(--branco);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--verde-mid);
+  margin-bottom: 16px;
+}
+
+/* FORM */
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--texto-soft);
+  margin-bottom: 6px;
+  letter-spacing: 0.03em;
+}
+input[type="text"], input[type="number"], input[type="password"], select, textarea {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1.5px solid var(--cream-dark);
+  border-radius: var(--radius-sm);
+  font-family: 'Sora', sans-serif;
+  font-size: 15px;
+  color: var(--texto);
+  background: var(--cream);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--verde-mid);
+  box-shadow: 0 0 0 3px rgba(0,128,64,0.1);
+  background: var(--branco);
+}
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23008040' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
+  cursor: pointer;
+}
+.form-group { margin-bottom: 14px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* BUTTONS */
+.btn {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'Sora', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-primary { background: var(--verde); color: white; }
+.btn-primary:active { background: var(--verde-mid); transform: scale(0.98); }
+.btn-secondary {
+  background: var(--cream);
+  color: var(--verde);
+  border: 1.5px solid var(--cream-dark);
+  margin-top: 10px;
+}
+.btn-google {
+  background: white;
+  color: #333;
+  border: 1.5px solid #ddd;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.btn-google:active { background: #f5f5f5; }
+.btn-danger { background: var(--erro); color: white; margin-top: 10px; }
+.btn-sm {
+  padding: 10px 16px;
+  font-size: 13px;
+  width: auto;
+}
+
+/* LOGIN */
+.login-box {
+  text-align: center;
+  padding: 10px 0;
+}
+.login-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--texto);
+  margin-bottom: 6px;
+}
+.login-sub {
+  font-size: 13px;
+  color: var(--texto-soft);
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+.google-icon {
+  width: 20px; height: 20px;
+  flex-shrink: 0;
+}
+
+/* HOME */
+.perfil-btn {
+  background: var(--branco);
+  border: none;
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  margin-bottom: 12px;
+  text-align: left;
+  transition: all 0.2s;
+}
+.perfil-btn:active { transform: scale(0.98); box-shadow: var(--shadow-lg); }
+.perfil-icon {
+  width: 50px; height: 50px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.icon-fisio { background: #e6f5ec; }
+.icon-chefe { background: #e8eaf6; }
+.icon-coord { background: #fff3e0; }
+.perfil-text h3 { font-size: 16px; font-weight: 700; color: var(--texto); margin-bottom: 3px; }
+.perfil-text p { font-size: 12px; color: var(--texto-soft); line-height: 1.4; }
+
+/* FISIO FORM */
+.fisio-names { display: flex; flex-direction: column; gap: 8px; }
+.name-input-wrap { position: relative; }
+.name-num {
+  position: absolute;
+  left: 14px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--verde-mid);
+  font-family: 'DM Mono', monospace;
+}
+.name-input-wrap input { padding-left: 36px; }
+
+.setor-bloqueado {
+  background: #fafafa;
+  border: 1.5px solid #e0e0e0;
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #888;
+}
+.setor-bloqueado strong { color: var(--texto); }
+
+/* TURNO SELECTOR */
+.turno-select {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.turno-opt {
+  border: 1.5px solid var(--cream-dark);
+  border-radius: var(--radius-sm);
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--cream);
+}
+.turno-opt.selected {
+  border-color: var(--verde-mid);
+  background: var(--verde-pale);
+  color: var(--verde);
+}
+.turno-opt-icon { font-size: 20px; margin-bottom: 4px; }
+.turno-opt-label { font-size: 12px; font-weight: 600; }
+
+/* SUCCESS */
+.success-box {
+  background: linear-gradient(135deg, #f0faf4, #e6f5ec);
+  border: 1.5px solid var(--verde-light);
+  border-radius: var(--radius);
+  padding: 32px 20px;
+  text-align: center;
+}
+.success-icon { font-size: 48px; margin-bottom: 12px; }
+.success-title { font-size: 20px; font-weight: 700; color: var(--verde); margin-bottom: 6px; }
+.success-sub { font-size: 13px; color: var(--texto-soft); line-height: 1.5; }
+
+/* TABS */
+.tabs {
+  display: flex;
+  background: var(--cream-dark);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  gap: 2px;
+}
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 9px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--texto-soft);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  min-width: 0;
+}
+.tab.active {
+  background: var(--branco);
+  color: var(--verde);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* STATS */
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.stat-card {
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+  padding: 14px 10px;
+  text-align: center;
+}
+.stat-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--verde);
+  line-height: 1;
+}
+.stat-label { font-size: 10px; color: var(--texto-soft); margin-top: 4px; font-weight: 500; }
+
+/* LANÇAMENTOS */
+.lancamento-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--cream-dark);
+}
+.lancamento-item:last-child { border-bottom: none; }
+.lanc-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 4px;
+}
+.lanc-setor { font-size: 14px; font-weight: 600; color: var(--texto); }
+.lanc-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--verde);
+}
+.lanc-num.over { color: var(--alerta); }
+.lanc-num.way-over { color: var(--erro); }
+.lanc-fisios { font-size: 11px; color: var(--texto-soft); }
+.lanc-hora { font-size: 10px; color: #bbb; font-family: 'DM Mono', monospace; }
+
+.linha-header {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--verde-mid);
+  padding: 12px 0 4px;
+  border-bottom: 1.5px solid var(--verde-pale);
+  margin-bottom: 4px;
+}
+
+/* PENDENTES */
+.pendente-chip {
+  display: inline-flex;
+  align-items: center;
+  background: #fff3e0;
+  border: 1px solid #ffcc80;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #bf360c;
+  margin: 3px;
+}
+
+/* RESULTADO */
+.resultado-box {
+  background: var(--verde);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.resultado-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--verde-glow);
+  margin-bottom: 14px;
+}
+.apoio-item {
+  background: rgba(255,255,255,0.1);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+.media-line {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.media-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 32px;
+  color: var(--verde-glow);
+}
+
+/* TEXTO WPP */
+.texto-wpp {
+  background: var(--cream);
+  border: 1.5px solid var(--cream-dark);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-bottom: 10px;
+}
+.btn-copy {
+  background: var(--verde-mid);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 13px;
+  width: 100%;
+  font-family: 'Sora', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-copy:active { background: var(--verde); transform: scale(0.98); }
+
+/* EDIT MODAL */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 100;
+  align-items: flex-end;
+  padding: 16px;
+}
+.modal-overlay.open { display: flex; }
+.modal-inner {
+  background: white;
+  border-radius: var(--radius);
+  padding: 24px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+.modal-sub { font-size: 13px; color: var(--texto-soft); margin-bottom: 20px; }
+
+/* ESCALA */
+.escala-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--cream-dark);
+}
+.escala-item:last-child { border-bottom: none; }
+.escala-setor { font-size: 13px; font-weight: 600; flex: 1; }
+.escala-fisios { font-size: 11px; color: var(--texto-soft); flex: 2; }
+.escala-status {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+.status-ok { background: var(--ok); }
+.status-pendente { background: var(--alerta); }
+.status-vazio { background: #ddd; }
+
+/* GRÁFICO */
+.chart-bar-wrap { margin-bottom: 10px; }
+.chart-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--texto-soft);
+  margin-bottom: 4px;
+}
+.chart-bar-bg {
+  height: 10px;
+  background: var(--cream-dark);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.chart-bar-fill {
+  height: 100%;
+  background: var(--verde-mid);
+  border-radius: 10px;
+  transition: width 0.6s ease;
+}
+.chart-bar-fill.alerta { background: var(--alerta); }
+.chart-bar-fill.ok { background: var(--verde-glow); }
+
+/* HIST */
+.hist-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--cream-dark);
+}
+.hist-item:last-child { border-bottom: none; }
+.hist-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.hist-data { font-size: 13px; font-weight: 600; }
+.hist-turno {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+  background: var(--verde-pale);
+  color: var(--verde);
+  font-family: 'DM Mono', monospace;
+}
+.hist-apoio { font-size: 12px; color: var(--texto-soft); }
+
+/* LOADING */
+.loading {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--texto-soft);
+  font-size: 14px;
+}
+.loading-spinner {
+  width: 32px; height: 32px;
+  border: 3px solid var(--cream-dark);
+  border-top-color: var(--verde);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 14px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* PIN */
+.pin-input {
+  text-align: center;
+  font-size: 24px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.3em;
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--verde);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 999;
+  transition: transform 0.3s ease;
+  white-space: nowrap;
+  box-shadow: var(--shadow-lg);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+.empty-state {
+  text-align: center;
+  padding: 30px 20px;
+  color: #bbb;
+  font-size: 13px;
+}
+.empty-icon { font-size: 36px; margin-bottom: 10px; }
+
+.btn-reset {
+  background: transparent;
+  color: var(--erro);
+  border: 1.5px solid var(--erro);
+  border-radius: var(--radius-sm);
+  padding: 11px;
+  width: 100%;
+  font-family: 'Sora', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.alerta-box {
+  background: #fff8f0;
+  border: 1.5px solid var(--alerta);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #7a4010;
+  margin-top: 10px;
+}
+
+.badge-beta {
+  display: inline-block;
+  background: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.9);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 2px 7px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  margin-left: 6px;
+  vertical-align: middle;
+  font-family: 'DM Mono', monospace;
+}
+
+.refresh-btn {
+  background: white;
+  border: 1.5px solid var(--cream-dark);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  width: 100%;
+  font-family: 'Sora', sans-serif;
+  font-size: 13px;
+  color: var(--texto-soft);
+  cursor: pointer;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+}
+.refresh-btn:active { background: var(--cream); }
+</style>
+</head>
+<body>
+
+
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div class="header-top">
+      <div class="logo-area">
+        <img src="data:image/jpeg;base64,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ON+yW/f4u9MDtFXdl53Z9FAkU98UON+yW/f4u9PFDjfslv3+LvTC7RN2XndO9CoEinvihxv2S37/ABd6eKHG/ZLfv8XemF2ibsvO6d6FQJFPfFDjfslv3+LvTxQ437Jb9/i70wu0Tdl53TvQqBIp74ocb9kt+/xd6eKHG/ZLfv8AF3phdom7LzunehUCRT3xQ437Jb9/i708UON+yW/f4u9MLtE3Zed070KgSKe+KHG/ZLfv8Xenihxv2S37/F3phdom7LzunehUCRT3xQ437Jb9/i708UON+yW/f4u9MLtE3Zed070KgSKe+KHG/ZLfv8Xenihxv2S37/F3phdom7LzunehUCRT3xQ437Jb9/i708UON+yW/f4u9MLtE3Zed070KgSKe+KHG/ZLfv8AF3p4ocb9kt+/xd6YXaJuy87p3oVAkU98UON+yW/f4u9PFDjfslv3+LvTC7RN2XndO9CoEp035v5+1A/LPXPxQ437Jb9/i71s8VYdueF9CTLbd208dTJiNszWRTtk8g07xn5J6wpDSJlaKFlcUWvdUYQMJ4hVeiIqLkoiIiLJHPPEMo5pGD/pcQufHKvtU/vCsCJKmSFn45V9qn94U45V9qn94VgRJTEVn45V9qn94U45V9qn94VgRJTEVn45V9qn94U45V9qn94VgRJTEVn45V9qn94U45V9qn94VgRJTEVn45V9qn94U45V9qn94VgRJTEVn45V9qn94U45V9qn94VgRJTEVn45V9qn94U45V9qn94VgRJTEVn45V9qn94U45V9qn94VgRJTEVn45V9qn94U45V9qn94VgRJTEVn45V9qn94U45V9qn94VgRJTEVn45V9qn94U45V9qn94VgRJTEVn45V9qn94VwlnnlbqyzSPGeeTnEhY0RJKIiIoX/9k=" alt="Unimed Fortaleza" style="height:36px;border-radius:6px;object-fit:contain;">
+        <img src="data:image/png;base64,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" alt="Fisioterapia" style="height:44px;object-fit:contain;">
+      </div>
+      <div class="turno-badge" id="relogio-badge">00:00</div>
+    </div>
+    <div class="header-title">Dimensionamento <span class="badge-beta">Beta</span></div>
+    <div class="header-date" id="header-date">—</div>
+    <div class="header-user" id="header-user" style="display:none">
+      <div class="user-dot"></div>
+      <span id="user-email-display"></span>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW: LOADING INICIAL -->
+<div class="view active" id="view-loading">
+  <div class="loading">
+    <div class="loading-spinner"></div>
+    Carregando...
+  </div>
+</div>
+
+<!-- VIEW: LOGIN -->
+<div class="view" id="view-login">
+  <div class="card">
+    <div class="login-box">
+      <div style="font-size:48px;margin-bottom:12px">🏥</div>
+      <div class="login-title">FisioHRU</div>
+      <div class="login-sub">Dimensionamento de fisioterapeutas<br>Hospital Unimed Fortaleza</div>
+      <button class="btn btn-google" onclick="fazerLogin()">
+        <svg class="google-icon" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Entrar com Google
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW: HOME -->
+<div class="view" id="view-home">
+  <button class="perfil-btn" onclick="irParaFisio()">
+    <div class="perfil-icon icon-fisio">🩺</div>
+    <div class="perfil-text">
+      <h3>Fisioterapeuta</h3>
+      <p>Informe o quantitativo aqui</p>
+    </div>
+  </button>
+  <button class="perfil-btn" onclick="irParaPin('chefe')">
+    <div class="perfil-icon icon-chefe">📋</div>
+    <div class="perfil-text">
+      <h3>Chefia de Plantão</h3>
+      <p>Gerencie aqui</p>
+    </div>
+  </button>
+  <button class="perfil-btn" onclick="irParaPin('coord')">
+    <div class="perfil-icon icon-coord">📊</div>
+    <div class="perfil-text">
+      <h3>Coordenação</h3>
+      <p>Gerenciamento de indicadores</p>
+    </div>
+  </button>
+  <button class="perfil-btn" onclick="window.mostrarView('view-regras')">
+    <div class="perfil-icon" style="background:#e8f5e9">📖</div>
+    <div class="perfil-text">
+      <h3>Regras</h3>
+      <p>Como funciona o dimensionamento</p>
+    </div>
+  </button>
+  <button class="perfil-btn" onclick="window.mostrarView('view-ramais')">
+    <div class="perfil-icon" style="background:#e3f2fd">📞</div>
+    <div class="perfil-text">
+      <h3>Ramais</h3>
+      <p>Lista de ramais dos setores</p>
+    </div>
+  </button>
+  <button class="btn btn-secondary" style="margin-top:4px" onclick="fazerLogout()">Sair da conta</button>
+</div>
+
+<!-- VIEW: FISIO -->
+<div class="view" id="view-fisio">
+  <div class="tabs">
+    <div class="tab active" onclick="mudarTabFisio('informar')">Informar</div>
+    <div class="tab" onclick="mudarTabFisio('escala')">Escala</div>
+    <div class="tab" onclick="mudarTabFisio('dimensionamento')">Dimensionamento</div>
+  </div>
+
+  <div class="tab-content active" id="fisio-tab-informar">
+  <div class="card">
+    <div class="card-title">Informar prescritos</div>
+
+    <div class="form-group">
+      <label>Turno</label>
+      <div class="turno-select">
+        <div class="turno-opt" onclick="selecionarTurno('manha',this)">
+          <div class="turno-opt-icon">☀️</div>
+          <div class="turno-opt-label">Manhã</div>
+        </div>
+        <div class="turno-opt" onclick="selecionarTurno('tarde',this)">
+          <div class="turno-opt-icon">🌤</div>
+          <div class="turno-opt-label">Tarde</div>
+        </div>
+        <div class="turno-opt" onclick="selecionarTurno('noite',this)">
+          <div class="turno-opt-icon">🌙</div>
+          <div class="turno-opt-label">SN</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Setor</label>
+      <select id="fisio-setor" onchange="onSetorChange()">
+        <option value="">Selecione o setor</option>
+      </select>
+    </div>
+
+    <div id="fisio-bloqueado" style="display:none" class="form-group">
+      <div class="setor-bloqueado" id="fisio-bloqueado-msg"></div>
+    </div>
+
+    <div id="fisio-form-extra" style="display:none">
+      <div class="form-group">
+        <label>Fisioterapeutas no setor (informe todos presentes)</label>
+        <div class="fisio-names">
+          <div class="name-input-wrap">
+            <span class="name-num">1</span>
+            <input type="text" id="fisio-n1" placeholder="Nome do 1º fisioterapeuta">
+          </div>
+          <div class="name-input-wrap">
+            <span class="name-num">2</span>
+            <input type="text" id="fisio-n2" placeholder="2º (opcional)">
+          </div>
+          <div class="name-input-wrap">
+            <span class="name-num">3</span>
+            <input type="text" id="fisio-n3" placeholder="3º (opcional)">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Pacientes prescritos</label>
+        <input type="number" id="fisio-prescritos" placeholder="0" min="0" max="99" inputmode="numeric" pattern="[0-9]*">
+      </div>
+      <div class="form-group" id="grupo-leitos" style="display:none">
+        <label>Leitos para atendimento noturno <span style="color:#aaa;font-weight:400">(informe os números separados por vírgula)</span></label>
+        <input type="text" id="fisio-leitos" placeholder="Ex: 301, 305, 312">
+      </div>
+      <button class="btn btn-primary" onclick="enviarLancamento()">Enviar</button>
+    </div>
+    <button class="btn btn-secondary" onclick="voltar()">Voltar</button>
+  </div>
+  </div><!-- fim fisio-tab-informar -->
+
+  <div class="tab-content" id="fisio-tab-escala">
+    <div class="card">
+      <div class="card-title">Quem está em cada setor</div>
+      <div id="fisio-escala-lista"><div class="empty-state"><div class="empty-icon">📋</div>Carregando escala...</div></div>
+    </div>
+    <button class="btn btn-secondary" onclick="voltar()">Voltar</button>
+  </div>
+
+  <div class="tab-content" id="fisio-tab-dimensionamento">
+    <div id="fisio-dim-conteudo">
+      <div class="empty-state"><div class="empty-icon">📊</div>O dimensionamento ainda não foi publicado pelo chefe de plantão.</div>
+    </div>
+    <div id="fisio-dim-leitura" style="display:none">
+      <button class="btn btn-success" style="background:var(--ok);color:white;margin-bottom:10px" onclick="marcarComoLido()">✅ Confirmar leitura</button>
+      <div id="fisio-leitura-status" style="text-align:center;font-size:12px;color:var(--texto-soft)"></div>
+    </div>
+    <button class="btn btn-secondary" onclick="voltar()">Voltar</button>
+  </div>
+</div>
+
+<!-- VIEW: FISIO OK -->
+<div class="view" id="view-fisio-ok">
+  <div class="success-box">
+    <div class="success-icon">✅</div>
+    <div class="success-title">Registrado!</div>
+    <div class="success-sub" id="success-sub">Lançamento enviado com sucesso.</div>
+  </div>
+  <button class="btn btn-secondary" style="margin-top:16px" onclick="voltar()">Voltar ao início</button>
+</div>
+
+<!-- VIEW: PIN -->
+<div class="view" id="view-pin">
+  <div class="card">
+    <div class="card-title">Acesso restrito</div>
+    <div class="form-group">
+      <label>PIN</label>
+      <input type="tel" id="pin-input" class="pin-input" placeholder="····" maxlength="4" inputmode="numeric" pattern="[0-9]*" onkeydown="if(event.key==='Enter')verificarPin()">
+    </div>
+    <button class="btn btn-primary" onclick="verificarPin()">Entrar</button>
+    <button class="btn btn-secondary" onclick="voltar()">Voltar</button>
+    <div id="pin-erro" style="display:none;color:var(--erro);font-size:13px;text-align:center;margin-top:10px">PIN incorreto.</div>
+  </div>
+</div>
+
+<!-- VIEW: CHEFE -->
+<div class="view" id="view-chefe">
+  <div class="tabs">
+    <div class="tab active" onclick="mudarTab('chefe','lanc')">Lançamentos</div>
+    <div class="tab" onclick="mudarTab('chefe','escala')">Escala</div>
+    <div class="tab" onclick="mudarTab('chefe','dim')">Dimensionamento</div>
+  </div>
+
+  <div class="tab-content active" id="chefe-tab-lanc">
+    <button class="refresh-btn" onclick="carregarLancamentos().then(()=>toast('✅ Lançamentos atualizados.'))">↻ Atualizar</button>
+    <div class="card">
+      <div class="card-title">Turno atual</div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-num" id="c-stat-info">0</div><div class="stat-label">Informados</div></div>
+        <div class="stat-card"><div class="stat-num" id="c-stat-pend">0</div><div class="stat-label">Pendentes</div></div>
+        <div class="stat-card"><div class="stat-num" id="c-stat-total">0</div><div class="stat-label">Prescritos</div></div>
+      </div>
+      <div class="stat-grid" style="margin-top:-8px">
+        <div class="stat-card"><div class="stat-num" id="c-stat-fisios">0</div><div class="stat-label">Fisioterapeutas</div></div>
+        <div class="stat-card"><div class="stat-num" id="c-stat-enf">0</div><div class="stat-label">Enf. informadas</div></div>
+        <div class="stat-card"><div class="stat-num" id="c-stat-uti">0</div><div class="stat-label">UTIs informadas</div></div>
+      </div>
+
+    </div>
+    <div class="card">
+      <div class="card-title">Cobertura do turno</div>
+      <div id="c-cobertura"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Lançamentos</div>
+      <div id="c-lancamentos"><div class="loading"><div class="loading-spinner"></div>Carregando...</div></div>
+    </div>
+    <button class="btn btn-primary" onclick="mudarTab('chefe','dim');calcularDim()">Calcular dimensionamento →</button>
+    <button class="btn btn-secondary" onclick="abrirModalEditar()">✏️ Editar lançamento</button>
+    <button class="btn-reset" onclick="confirmarReset('chefe')">🗑 Zerar turno</button>
+    <button class="btn btn-secondary" style="margin-top:8px" onclick="sair()">Sair</button>
+  </div>
+
+  <div class="tab-content" id="chefe-tab-escala">
+    <div class="card">
+      <div class="card-title">Quem está em cada setor</div>
+      <div id="c-escala"><div class="empty-state"><div class="empty-icon">📋</div>Carregando escala...</div></div>
+    </div>
+    <button class="btn btn-secondary" onclick="sair()">Sair</button>
+  </div>
+
+  <div class="tab-content" id="chefe-tab-dim">
+    <div id="c-dim-resultado"></div>
+    <button class="btn btn-secondary" onclick="mudarTab('chefe','lanc')">← Voltar</button>
+    <button class="btn btn-secondary" style="margin-top:8px" onclick="sair()">Sair</button>
+  </div>
+</div>
+
+<!-- VIEW: COORD -->
+<div class="view" id="view-coord">
+  <div class="tabs">
+    <div class="tab active" onclick="mudarTab('coord','hoje')">Hoje</div>
+    <div class="tab" onclick="mudarTab('coord','escala')">Escala</div>
+    <div class="tab" onclick="mudarTab('coord','graficos')">Indicadores</div>
+    <div class="tab" onclick="mudarTab('coord','hist')">Gráfico</div>
+  </div>
+
+  <div class="tab-content active" id="coord-tab-hoje">
+    <button class="refresh-btn" onclick="carregarLancamentos().then(()=>{renderCoordHoje();toast('✅ Lançamentos atualizados.');})">↻ Atualizar</button>
+    <div class="card" id="card-medias-coord" style="display:none">
+      <div class="card-title">Média de pacientes por fisioterapeuta</div>
+      <div id="coord-medias"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Visão geral do dia</div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-num" id="coord-stat-info">0</div><div class="stat-label">Informados</div></div>
+        <div class="stat-card"><div class="stat-num" id="coord-stat-pend">0</div><div class="stat-label">Pendentes</div></div>
+        <div class="stat-card"><div class="stat-num" id="coord-stat-total">0</div><div class="stat-label">Prescritos</div></div>
+      </div>
+      <div class="stat-grid" style="margin-top:-8px">
+        <div class="stat-card"><div class="stat-num" id="coord-stat-fisios">0</div><div class="stat-label">Fisioterapeutas</div></div>
+        <div class="stat-card"><div class="stat-num" id="coord-stat-enf">0</div><div class="stat-label">Enf. informadas</div></div>
+        <div class="stat-card"><div class="stat-num" id="coord-stat-uti">0</div><div class="stat-label">UTIs informadas</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Cobertura do turno</div>
+      <div id="coord-cobertura"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Lançamentos</div>
+      <div id="coord-lancamentos"><div class="loading"><div class="loading-spinner"></div></div></div>
+    </div>
+    <button class="btn btn-secondary" onclick="sair()">Sair</button>
+    <button class="btn-reset" onclick="confirmarReset('coord')">🗑 Reset manual do turno</button>
+  </div>
+
+  <div class="tab-content" id="coord-tab-escala">
+    <div class="card">
+      <div class="card-title">Escala do turno</div>
+      <div id="coord-escala"></div>
+    </div>
+    <button class="btn btn-secondary" onclick="sair()">Sair</button>
+  </div>
+
+  <div class="tab-content" id="coord-tab-graficos">
+    <div class="card">
+      <div class="card-title">Indicadores do mês</div>
+      <div id="coord-graficos"><div class="empty-state"><div class="empty-icon">📊</div>Calculando dados...</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Resumo de apoios</div>
+      <div id="coord-grafico-dias"></div>
+    </div>
+    <button class="btn btn-secondary" onclick="sair()">Sair</button>
+  </div>
+
+  <div class="tab-content" id="coord-tab-hist">
+    <div class="card">
+      <div class="card-title">Gráfico de prescritos ao longo do mês</div>
+      <div style="font-size:11px;color:var(--texto-soft);margin-bottom:12px">Linha vermelha = teto das enfermarias (fisios × 10). Quando a barra ultrapassa, as UTIs foram acionadas.</div>
+      <div id="coord-grafico-linha" style="overflow-x:auto">
+        <div class="loading"><div class="loading-spinner"></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Adesão ao app — mês atual</div>
+      <div id="coord-adesao"><div class="loading"><div class="loading-spinner"></div></div></div>
+    </div>
+    <button class="btn btn-secondary" onclick="sair()">Sair</button>
+  </div>
+</div>
+
+<!-- VIEW: REGRAS -->
+<div class="view" id="view-regras">
+  <div class="card">
+    <div class="card-title">Regras de negócio</div>
+
+    <div class="linha-header">Classificação dos setores</div>
+    <div style="font-size:13px;line-height:1.7;color:var(--texto);padding:10px 0">
+      <strong>Críticos Fechados</strong> — não dimensionáveis. Fisioterapeutas atendem exclusivamente sua própria demanda.<br>
+      Emergência · UTI 3º Sul · UTI 4º Sul · 7º Sul<br><br>
+      <strong>Críticos Dimensionáveis</strong> — apoiam semi-críticos e clínicas quando acionados.<br>
+      UTI PAC (máx. 6 pacientes de apoio) · UTI 8ºN (máx. 7 pacientes de apoio)<br><br>
+      <strong>Semi-Críticos</strong> — dividem-se entre si. Se ultrapassar 10 pac./fisio, acionam os críticos dimensionáveis.<br>
+      USIN · UCEN<br><br>
+      <strong>Clínicas A</strong> — 5º Sul · 5º Norte · 6º Sul · 7º Norte<br><br>
+      <strong>Clínicas B</strong> — 4º Andar · 6º Norte · 8º Sul
+    </div>
+
+    <div class="linha-header">Dimensionamento dos Semi-Críticos</div>
+    <div style="font-size:13px;line-height:1.7;color:var(--texto);padding:10px 0">
+      USIN e UCEN dividem os pacientes entre si. Se a média ultrapassar <strong>10 pac./fisio</strong>, o excedente é dividido igualmente entre UTI PAC e UTI 8ºN. Em caso de número ímpar, UTI 8ºN recebe um paciente a mais.
+    </div>
+
+    <div class="linha-header">Dimensionamento das Clínicas</div>
+    <div style="font-size:13px;line-height:1.7;color:var(--texto);padding:10px 0">
+      A soma de pacientes das Clínicas A e B é dividida pelo total de fisioterapeutas. Preferencialmente, Clínicas A apoiam-se entre si e Clínicas B entre si.<br><br>
+      Se a média ultrapassar <strong>10 pac./fisio</strong>, o excedente é dividido igualmente entre UTI PAC e UTI 8ºN. Em número ímpar, UTI 8ºN recebe um a mais.<br><br>
+      A <strong>UTI PAC</strong> tem preferência de apoio às Clínicas B. A <strong>UTI 8ºN</strong> também tem preferência pelas Clínicas B.
+    </div>
+
+    <div class="linha-header">Pacientes remanescentes</div>
+    <div style="font-size:13px;line-height:1.7;color:var(--texto);padding:10px 0">
+      Se após o acionamento de todos os críticos dimensionáveis ainda houver pacientes sem cobertura, eles devem ser realocados nos setores clínicos. Priorizar pareceres de pacientes menos críticos para Clínicas A e B.
+    </div>
+
+    <div class="linha-header">Turno da noite (SN)</div>
+    <div style="font-size:13px;line-height:1.7;color:var(--texto);padding:10px 0">
+      Apenas UTIs e unidades 24h têm fisioterapeutas presentes. Os plantonistas do dia sinalizam até 19h quais leitos das enfermarias precisam de atendimento noturno, informando o quantitativo e os <strong>números dos leitos</strong>. O chefe da noite distribui entre os plantonistas das UTIs.<br><br>
+      À noite, UTI PAC e UTI 8ºN ficam com <strong>um fisioterapeuta cada</strong>. Se houver excedente, a distribuição deve ser a mais igualitária possível.
+    </div>
+
+    <div class="linha-header">Alta demanda e pacientes sem cobertura</div>
+    <div style="font-size:13px;line-height:1.7;color:var(--texto);padding:10px 0">
+      Em dias de alta demanda onde os apoios disponíveis não forem suficientes para cobrir todos os pacientes, o uso de <strong>pareceres bem indicados</strong> deve ser considerado. Pacientes com prescrição de <strong>1x ao dia</strong> devem ser ajustados para atendimento à tarde, liberando capacidade no turno da manhã.
+    </div>
+
+    <div class="linha-header">UTI PAC aos domingos</div>
+    <div style="font-size:13px;line-height:1.7;color:var(--texto);padding:10px 0">
+      Aos domingos, a UTI PAC opera com apenas 1 fisioterapeuta e é tratada como <strong>crítico fechado</strong> — não dimensionável. O profissional não pode se ausentar do setor para dar apoio.
+    </div>
+
+    <div class="linha-header">Turnos, horários e janelas de preenchimento</div>
+    <div style="font-size:13px;line-height:1.7;color:var(--texto);padding:10px 0">
+      ☀️ <strong>Manhã</strong> — informar até 07:30 · janela encerra às 12:00<br>
+      🌤 <strong>Tarde</strong> — informar até 13:30 · janela encerra às 17:40<br>
+      🌙 <strong>SN</strong> — informar até 19:00 · janela encerra às 05:00 do dia seguinte<br><br>
+      ⚠️ <strong>Atenção:</strong> o app realiza resets automáticos nos seguintes horários:<br>
+      • <strong>05:00</strong> — zera o turno SN da noite anterior<br>
+      • <strong>12:00</strong> — zera o turno da manhã<br>
+      • <strong>17:40</strong> — zera o turno da tarde<br><br>
+      Dados inseridos fora da janela correta serão apagados no próximo reset. Respeite os horários para que nenhuma informação seja perdida.
+    </div>
+
+
+  </div>
+  <button class="btn btn-secondary" onclick="window.mostrarView('view-home')">Voltar</button>
+</div>
+
+<!-- VIEW: RAMAIS -->
+<div class="view" id="view-ramais">
+  <div class="card">
+    <div class="card-title">Ramais dos setores</div>
+
+    <div class="linha-header">Coordenação</div>
+    <div class="escala-item">
+      <div class="escala-setor">Coordenação de Fisioterapia</div>
+      <div class="escala-fisios" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--verde)">7239</div>
+    </div>
+
+    <div class="linha-header" style="margin-top:10px">Críticos Dimensionáveis</div>
+    <div class="escala-item">
+      <div class="escala-setor">UTI PAC</div>
+      <div class="escala-fisios" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--verde)">7286 · 7216</div>
+    </div>
+    <div class="escala-item">
+      <div class="escala-setor">UTI 8ºN</div>
+      <div class="escala-fisios" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--verde)">7852</div>
+    </div>
+
+    <div class="linha-header" style="margin-top:10px">Críticos Fechados</div>
+    <div class="escala-item">
+      <div class="escala-setor">UTI 4ºS</div>
+      <div class="escala-fisios" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--verde)">7372</div>
+    </div>
+    <div class="escala-item">
+      <div class="escala-setor">UTI 3ºS</div>
+      <div class="escala-fisios" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--verde)">7234</div>
+    </div>
+    <div class="escala-item">
+      <div class="escala-setor">Emergência</div>
+      <div class="escala-fisios" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--verde)">7201</div>
+    </div>
+
+    <div class="linha-header" style="margin-top:10px">Semi-Críticos</div>
+    <div class="escala-item">
+      <div class="escala-setor">USIN</div>
+      <div class="escala-fisios" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--verde)">7232</div>
+    </div>
+    <div class="escala-item">
+      <div class="escala-setor">UCEN</div>
+      <div class="escala-fisios" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--verde)">7377</div>
+    </div>
+
+    <div class="linha-header" style="margin-top:10px">Clínicas A</div>
+    <div class="escala-item">
+      <div class="escala-setor">5º Sul</div>
+      <div class="escala-fisios" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--verde)">7845</div>
+    </div>
+    <div class="escala-item">
+      <div class="escala-setor">5º Norte</div>
+      <div class="escala-fisios" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--verde)">7251</div>
+    </div>
+    <div class="escala-item">
+      <div class="escala-setor">6º Sul</div>
+      <div class="escala-fisios" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--verde)">7262 · 7261</div>
+    </div>
+    <div class="escala-item">
+      <div class="escala-setor">7º Norte</div>
+      <div class="escala-fisios" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--verde)">7761</div>
+    </div>
+
+    <div class="linha-header" style="margin-top:10px">Clínicas B</div>
+    <div class="escala-item">
+      <div class="escala-setor">4º Andar (Sul)</div>
+      <div class="escala-fisios" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--verde)">7442</div>
+    </div>
+    <div class="escala-item">
+      <div class="escala-setor">4º Andar (Norte)</div>
+      <div class="escala-fisios" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--verde)">7241</div>
+    </div>
+    <div class="escala-item">
+      <div class="escala-setor">6º Norte</div>
+      <div class="escala-fisios" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--verde)">7645 · 7644</div>
+    </div>
+    <div class="escala-item">
+      <div class="escala-setor">8º Sul</div>
+      <div class="escala-fisios" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--verde)">7247</div>
+    </div>
+
+    <div class="linha-header" style="margin-top:10px">Oncohematologia / TMO</div>
+    <div class="escala-item">
+      <div class="escala-setor">7º Sul</div>
+      <div class="escala-fisios" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--verde)">7787 · 7775</div>
+    </div>
+  </div>
+  <button class="btn btn-secondary" onclick="window.mostrarView('view-home')">Voltar</button>
+</div>
+
+<!-- MODAL EDITAR -->
+<div class="modal-overlay" id="modal-editar">
+  <div class="modal-inner">
+    <div class="modal-title">Editar lançamento</div>
+    <div class="modal-sub">Corrija os dados do setor selecionado.</div>
+    <div class="form-group">
+      <label>Setor</label>
+      <select id="edit-setor" onchange="preencherEdicao()"></select>
+    </div>
+    <div class="form-group">
+      <label>Fisioterapeuta 1</label>
+      <input type="text" id="edit-n1" placeholder="Nome do 1º fisioterapeuta">
+    </div>
+    <div class="form-group">
+      <label>Fisioterapeuta 2 (opcional)</label>
+      <input type="text" id="edit-n2" placeholder="Nome do 2º fisioterapeuta">
+    </div>
+    <div class="form-group">
+      <label>Fisioterapeuta 3 (opcional)</label>
+      <input type="text" id="edit-n3" placeholder="Nome do 3º fisioterapeuta">
+    </div>
+    <div class="form-group">
+      <label>Pacientes prescritos</label>
+      <input type="number" id="edit-prescritos" min="0" max="99" inputmode="numeric" pattern="[0-9]*">
+    </div>
+    <button class="btn btn-primary" onclick="salvarEdicao()">Salvar alterações</button>
+    <button class="btn btn-secondary" onclick="fecharModal('modal-editar')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL CONFIRM RESET -->
+<div class="modal-overlay" id="modal-reset">
+  <div class="modal-inner">
+    <div class="modal-title">Zerar turno</div>
+    <div class="modal-sub">Selecione qual turno deseja zerar. Ação irreversível.</div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label>Turno</label>
+      <select id="reset-turno-select" style="width:100%;padding:12px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;font-family:Sora,sans-serif">
+        <option value="manha">☀️ Manhã</option>
+        <option value="tarde">🌤 Tarde</option>
+        <option value="noite">🌙 SN (Noite)</option>
+      </select>
+    </div>
+    <button class="btn btn-danger" onclick="executarReset()">Sim, zerar agora</button>
+    <button class="btn btn-secondary" onclick="fecharModal('modal-reset')">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, doc, setDoc, getDoc, collection, query, where,
+  getDocs, deleteDoc, onSnapshot, orderBy, limit }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyANWUS-kupG9In0YDOxsRipBBjOhloKUCQ",
+  authDomain: "fisio-hru-f6c6d.firebaseapp.com",
+  projectId: "fisio-hru-f6c6d",
+  storageBucket: "fisio-hru-f6c6d.firebasestorage.app",
+  messagingSenderId: "672926612375",
+  appId: "1:672926612375:web:45ffbe276852643c2c22d2"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+// =====================
+// DADOS
+// =====================
+const PIN = '7239';
+const LIMITE = 10;
+
+const SETORES = {
+  'CLÍNICAS A': [
+    { id: '5sul',   nome: '5º Sul',   tipo: 'clinica_a', andar: 5 },
+    { id: '5norte', nome: '5º Norte', tipo: 'clinica_a', andar: 5 },
+    { id: '6sul',   nome: '6º Sul',   tipo: 'clinica_a', andar: 6 },
+    { id: '7norte', nome: '7º Norte', tipo: 'clinica_a', andar: 7 },
+  ],
+  'CLÍNICAS B': [
+    { id: '4andar', nome: '4º Andar', tipo: 'clinica_b', andar: 4 },
+    { id: '6norte', nome: '6º Norte', tipo: 'clinica_b', andar: 6 },
+    { id: '8sul',   nome: '8º Sul',   tipo: 'clinica_b', andar: 8 },
+  ],
+  'SEMI-CRÍTICOS': [
+    { id: 'usin', nome: 'USIN', tipo: 'semi_critico', andar: 3 },
+    { id: 'ucen', nome: 'UCEN', tipo: 'semi_critico', andar: 3 },
+  ],
+  'CRÍTICOS DIMENSIONÁVEIS': [
+    { id: 'utipac',  nome: 'UTI PAC',  tipo: 'critico_dim', apoio_max: 6, andar: 1, pref: 'clinica_b' },
+    { id: 'uti8n',   nome: 'UTI 8ºN',  tipo: 'critico_dim', apoio_max: 7, andar: 8, pref: 'clinica_b', extra_impar: true },
+  ],
+  'CRÍTICOS FECHADOS': [
+    { id: 'emergencia', nome: 'Emergência',  tipo: 'critico_fechado', andar: 0 },
+    { id: 'uti3sul',    nome: 'UTI 3º Sul',  tipo: 'critico_fechado', andar: 3 },
+    { id: 'uti4sul',    nome: 'UTI 4º Sul',  tipo: 'critico_fechado', andar: 4 },
+    { id: '7sul',       nome: '7º Sul',      tipo: 'critico_fechado', andar: 7 },
+  ],
+};
+
+const TODOS_BASE = Object.values(SETORES).flat();
+
+function getTODOS() {
+  const diaSemana = new Date().getDay(); // 0 = domingo
+  if (diaSemana === 0) {
+    // Domingo: UTI PAC vira crítico fechado
+    return TODOS_BASE.map(s => s.id === 'utipac'
+      ? { ...s, tipo: 'critico_fechado' }
+      : s
+    );
+  }
+  return TODOS_BASE;
+}
+
+// TODOS é recalculado a cada uso
+Object.defineProperty(window, 'TODOS', { get: getTODOS });
+const getSetor = id => TODOS.find(s => s.id === id);
+
+let turnoSelecionado = null;
+let lancamentosCache = {};
+let perfilAtual = null;
+let resetTarget = null;
+
+// =====================
+// HELPERS
+// =====================
+function getHoje() { return new Date().toISOString().slice(0,10); }
+
+function getChave(turno) { return `${getHoje()}_${turno}`; }
+
+function mostrarView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+window.mostrarView = mostrarView;
+
+window.toast = function toast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+function abrirModal(id) { document.getElementById(id).classList.add('open'); }
+function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function mudarTab(perfil, tab) {
+  const prefix = perfil === 'chefe' ? 'chefe' : 'coord';
+  document.querySelectorAll(`#view-${prefix} .tab`).forEach((t,i) => {
+    const tabs = perfil === 'chefe' ? ['lanc','escala','dim'] : ['hoje','escala','graficos','hist'];
+    t.classList.toggle('active', tabs[i] === tab);
+  });
+  document.querySelectorAll(`#view-${prefix} .tab-content`).forEach(tc => tc.classList.remove('active'));
+  document.getElementById(`${prefix}-tab-${tab}`).classList.add('active');
+
+  if (perfil === 'chefe' && tab === 'escala') renderEscala('c-escala');
+  if (perfil === 'coord' && tab === 'escala') renderEscala('coord-escala');
+  if (perfil === 'coord' && tab === 'graficos') renderGraficos();
+  if (perfil === 'coord' && tab === 'hist') renderHistorico();
+}
+
+window.mudarTab = mudarTab;
+window.fecharModal = fecharModal;
+
+// =====================
+// AUTH
+// =====================
+onAuthStateChanged(auth, user => {
+  if (user) {
+    document.getElementById('header-user').style.display = 'flex';
+    document.getElementById('user-email-display').textContent = user.email;
+    mostrarView('view-home');
+  } else {
+    document.getElementById('header-user').style.display = 'none';
+    mostrarView('view-login');
+  }
+});
+
+window.fazerLogin = async () => {
+  try { await signInWithPopup(auth, provider); }
+  catch(e) { toast('Erro ao entrar. Tente novamente.'); }
+};
+
+window.fazerLogout = async () => {
+  await signOut(auth);
+  mostrarView('view-login');
+};
+
+window.sair = () => { mostrarView('view-home'); perfilAtual = null; };
+
+// =====================
+// HEADER
+// =====================
+function atualizarHeader() {
+  const agora = new Date();
+  const hh = String(agora.getHours()).padStart(2,'0');
+  const mm = String(agora.getMinutes()).padStart(2,'0');
+  const relogio = document.getElementById('relogio-badge');
+  if (relogio) relogio.textContent = `${hh}:${mm}`;
+  const hoje = agora.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  const hd = document.getElementById('header-date');
+  if (hd) hd.textContent = hoje.charAt(0).toUpperCase()+hoje.slice(1);
+}
+atualizarHeader();
+setInterval(atualizarHeader, 30000);
+
+// =====================
+// FISIO
+// =====================
+window.irParaFisio = () => {
+  popularSetores();
+  turnoSelecionado = null;
+  document.querySelectorAll('.turno-opt').forEach(o => o.classList.remove('selected'));
+  document.getElementById('fisio-setor').value = '';
+  document.getElementById('fisio-bloqueado').style.display = 'none';
+  document.getElementById('fisio-form-extra').style.display = 'none';
+  document.getElementById('fisio-n1').value = '';
+  document.getElementById('fisio-n2').value = '';
+  document.getElementById('fisio-n3').value = '';
+  document.getElementById('fisio-prescritos').value = '';
+  mostrarView('view-fisio');
+};
+
+window.voltar = () => mostrarView('view-home');
+
+window.selecionarTurno = (t, el) => {
+  turnoSelecionado = t;
+  document.querySelectorAll('.turno-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  onSetorChange();
+  atualizarCampoLeitos();
+};
+
+function popularSetores() {
+  const sel = document.getElementById('fisio-setor');
+  sel.innerHTML = '<option value="">Selecione o setor</option>';
+  Object.entries(SETORES).forEach(([grupo, setores]) => {
+    const og = document.createElement('optgroup');
+    og.label = grupo;
+    setores.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.id;
+      opt.textContent = s.nome;
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  });
+}
+
+window.onSetorChange = async () => {
+  const setorId = document.getElementById('fisio-setor').value;
+  atualizarCampoLeitos();
+  if (!setorId || !turnoSelecionado) {
+    document.getElementById('fisio-bloqueado').style.display = 'none';
+    document.getElementById('fisio-form-extra').style.display = 'none';
+    return;
+  }
+  const ref = doc(db, 'lancamentos', `${getChave(turnoSelecionado)}_${setorId}`);
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    const d = snap.data();
+    const nomes = [d.fisio1, d.fisio2, d.fisio3].filter(Boolean).join(', ');
+    document.getElementById('fisio-bloqueado-msg').innerHTML =
+      `<strong>${getSetor(setorId).nome}</strong> já foi informado por <strong>${nomes}</strong> — ${d.prescritos} prescritos às ${d.hora}.`;
+    document.getElementById('fisio-bloqueado').style.display = 'block';
+    document.getElementById('fisio-form-extra').style.display = 'none';
+  } else {
+    document.getElementById('fisio-bloqueado').style.display = 'none';
+    document.getElementById('fisio-form-extra').style.display = 'block';
+  }
+};
+
+window.enviarLancamento = async () => {
+  if (!turnoSelecionado) { toast('Selecione o turno.'); return; }
+  const setorId = document.getElementById('fisio-setor').value;
+  if (!setorId) { toast('Selecione o setor.'); return; }
+  const n1 = document.getElementById('fisio-n1').value.trim();
+  if (!n1) { toast('Informe ao menos o 1º nome.'); return; }
+  const prescritos = document.getElementById('fisio-prescritos').value;
+  if (prescritos === '' || parseInt(prescritos) < 0) { toast('Informe o número de prescritos.'); return; }
+
+  const setor = getSetor(setorId);
+  const agora = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const user = auth.currentUser;
+
+  try {
+    const leitosVal = document.getElementById('fisio-leitos')?.value.trim() || null;
+    await setDoc(doc(db, 'lancamentos', `${getChave(turnoSelecionado)}_${setorId}`), {
+      setorId,
+      turno: turnoSelecionado,
+      data: getHoje(),
+      fisio1: n1,
+      fisio2: document.getElementById('fisio-n2').value.trim() || null,
+      fisio3: document.getElementById('fisio-n3').value.trim() || null,
+      prescritos: parseInt(prescritos),
+      leitos: leitosVal,
+      hora: agora,
+      uid: user.uid,
+      email: user.email
+    });
+    const nomes = [n1, document.getElementById('fisio-n2').value.trim(), document.getElementById('fisio-n3').value.trim()].filter(Boolean).join(', ');
+    document.getElementById('success-sub').textContent =
+      `${setor.nome} · ${prescritos} prescritos · ${nomes}`;
+    mostrarView('view-fisio-ok');
+  } catch(e) { toast('Erro ao salvar. Verifique a conexão.'); }
+};
+
+// =====================
+// PIN
+// =====================
+window.irParaPin = (perfil) => {
+  perfilAtual = perfil;
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-erro').style.display = 'none';
+  mostrarView('view-pin');
+};
+
+window.verificarPin = () => {
+  const pin = document.getElementById('pin-input').value;
+  if (pin === PIN) {
+    if (perfilAtual === 'chefe') {
+      mostrarView('view-chefe');
+      mudarTab('chefe','lanc');
+      carregarLancamentos();
+    } else {
+      mostrarView('view-coord');
+      mudarTab('coord','hoje');
+      carregarLancamentos().then(renderCoordHoje);
+      renderHistorico();
+    }
+  } else {
+    document.getElementById('pin-erro').style.display = 'block';
+  }
+};
+
+// =====================
+// LANÇAMENTOS
+// =====================
+async function carregarLancamentos() {
+  const turno = turnoSelecionado || getTurnoAtual();
+  const q = query(collection(db, 'lancamentos'),
+    where('turno','==',turno));
+  const snap = await getDocs(q);
+  lancamentosCache = {};
+  snap.forEach(d => { lancamentosCache[d.data().setorId] = d.data(); });
+  renderLancamentos('c-lancamentos');
+  renderLancamentos('coord-lancamentos');
+  atualizarStats();
+  return lancamentosCache;
+}
+window.carregarLancamentos = carregarLancamentos;
+
+function getTurnoAtual() {
+  const h=new Date().getHours(),m=new Date().getMinutes(),t=h*60+m;
+  return t<7*60+30?'manha':t<13*60+30?'tarde':'noite';
+}
+
+function renderCobertura() {
+  ['c-cobertura', 'coord-cobertura'].forEach(elId => {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    let html = '';
+    Object.entries(SETORES).forEach(([grupo, setores]) => {
+      html += `<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--verde-mid);margin:10px 0 6px">${grupo}</div>`;
+      html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px">';
+      setores.forEach(s => {
+        const l = lancamentosCache[s.id];
+        const preenchido = !!l;
+        const bg = preenchido ? 'var(--ok)' : '#e74c3c';
+        const txt = preenchido ? `${s.nome} · ${l.prescritos}` : s.nome;
+        html += `<div style="background:${bg};color:white;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;opacity:${preenchido?1:0.85}">${txt}</div>`;
+      });
+      html += '</div>';
+    });
+    el.innerHTML = html;
+  });
+}
+
+function atualizarStats() {
+  const informados = Object.keys(lancamentosCache).length;
+  const total = TODOS.length;
+  const pendentes = total - informados;
+  const totalP = Object.values(lancamentosCache).reduce((a,b)=>a+(b.prescritos||0),0);
+
+  // Contar fisios únicos (soma de fisio1+2+3 de todos os lançamentos)
+  let totalFisios = 0;
+  let enfInformadas = 0;
+  let utiInformadas = 0;
+  Object.entries(lancamentosCache).forEach(([setorId, l]) => {
+    const s = getSetor(setorId);
+    const nFisios = [l.fisio1, l.fisio2, l.fisio3].filter(Boolean).length;
+    totalFisios += nFisios;
+    if (s && (s.tipo === 'clinica_a' || s.tipo === 'clinica_b')) enfInformadas++;
+    if (s && (s.tipo === 'semi_critico' || s.tipo === 'critico_dim' || s.tipo === 'critico_fechado')) utiInformadas++;
+  });
+
+  ['c','coord'].forEach(p => {
+    const si = document.getElementById(`${p}-stat-info`);
+    const sp = document.getElementById(`${p}-stat-pend`);
+    const st = document.getElementById(`${p}-stat-total`);
+    const sf = document.getElementById(`${p}-stat-fisios`);
+    const se = document.getElementById(`${p}-stat-enf`);
+    const su = document.getElementById(`${p}-stat-uti`);
+    if (si) si.textContent = informados;
+    if (sp) sp.textContent = pendentes;
+    if (st) st.textContent = totalP;
+    if (sf) sf.textContent = totalFisios;
+    if (se) se.textContent = enfInformadas;
+    if (su) su.textContent = utiInformadas;
+  });
+
+  // Painel visual de cobertura
+  renderCobertura();
+
+
+}
+
+function renderLancamentos(elId) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (!Object.keys(lancamentosCache).length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div>Nenhum lançamento ainda.</div>';
+    return;
+  }
+  let html = '';
+  Object.entries(SETORES).forEach(([grupo, setores]) => {
+    const com = setores.filter(s => lancamentosCache[s.id]);
+    if (!com.length) return;
+    html += `<div class="linha-header">${grupo}</div>`;
+    com.forEach(s => {
+      const l = lancamentosCache[s.id];
+      const p = l.prescritos;
+      const cls = p>15?'way-over':p>10?'over':'';
+      const nomes = [l.fisio1,l.fisio2,l.fisio3].filter(Boolean).join(' · ');
+      const leitosStr = l.leitos ? `<div style="font-size:11px;color:var(--alerta);margin-top:2px">🛏 Leitos: ${l.leitos}</div>` : '';
+      html += `<div class="lancamento-item">
+        <div class="lanc-top">
+          <div class="lanc-setor">${s.nome}</div>
+          <div class="lanc-num ${cls}">${p}</div>
+        </div>
+        <div class="lanc-fisios">${nomes}</div>
+        ${leitosStr}
+        <div class="lanc-hora">${l.hora}</div>
+      </div>`;
+    });
+  });
+  el.innerHTML = html;
+}
+
+// =====================
+// ESCALA
+// =====================
+function renderEscala(elId) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  let html = '';
+  Object.entries(SETORES).forEach(([grupo, setores]) => {
+    html += `<div class="linha-header">${grupo}</div>`;
+    setores.forEach(s => {
+      const l = lancamentosCache[s.id];
+      const nomes = l ? [l.fisio1,l.fisio2,l.fisio3].filter(Boolean).join(', ') : '—';
+      const statusClass = l ? 'status-ok' : 'status-pendente';
+      html += `<div class="escala-item">
+        <div class="escala-setor">${s.nome}</div>
+        <div class="escala-fisios">${nomes}</div>
+        <div class="escala-status ${statusClass}"></div>
+      </div>`;
+    });
+  });
+  el.innerHTML = html;
+}
+
+// =====================
+// DIMENSIONAMENTO
+// =====================
+window.calcularDim = () => {
+  // Detectar turno a partir dos lançamentos no cache (não pelo horário)
+  const turnoDetectado = Object.values(lancamentosCache)[0]?.turno || getTurnoAtual();
+  const turno = turnoDetectado;
+  const labels = {manha:'Manhã', tarde:'Tarde', noite:'SN'};
+  const turnoLabel = labels[turno] || 'Manhã';
+
+  const clinicasA  = TODOS.filter(s => s.tipo === 'clinica_a');
+  const clinicasB  = TODOS.filter(s => s.tipo === 'clinica_b');
+  const semiCrit   = TODOS.filter(s => s.tipo === 'semi_critico');
+  const utipac     = TODOS.find(s => s.id === 'utipac');
+  const uti8n      = TODOS.find(s => s.id === 'uti8n');
+
+  const totalFisiosInformados = TODOS.filter(s => s.tipo !== 'critico_fechado' && lancamentosCache[s.id]).length;
+
+  // Estado mutável de cada setor
+  const estado = {};
+  TODOS.forEach(s => {
+    const l = lancamentosCache[s.id];
+    if (!l) return;
+    const fis = [l.fisio1, l.fisio2, l.fisio3].filter(Boolean).length || 1;
+    const pac = l.prescritos || 0;
+    const teto = fis * LIMITE;
+    estado[s.id] = {
+      nome: s.nome,
+      tipo: s.tipo,
+      pac,
+      fis,
+      teto,
+      excedente: Math.max(0, pac - teto),
+      folga: Math.max(0, teto - pac),
+      andar: s.andar || 0
+    };
+  });
+
+  const apoios = []; // { origem (quem apoia/tem folga), destino (quem precisa/tem excedente), qtd }
+
+  // Quem tem FOLGA (origem) vai apoiar quem tem EXCEDENTE (destino)
+  function transferir(origens, destinos, maxTotal) {
+    // Origens = setores com folga (quem vai ajudar)
+    // Destinos = setores com excedente (quem precisa de ajuda)
+    const rec = origens
+      .filter(id => estado[id] && estado[id].folga > 0)
+      .sort((a,b) => estado[b].folga - estado[a].folga);
+    const exc = destinos
+      .filter(id => estado[id] && estado[id].excedente > 0)
+      .sort((a,b) => {
+        const diff = estado[b].excedente - estado[a].excedente;
+        return diff !== 0 ? diff : Math.abs(estado[a].andar - estado[b].andar);
+      });
+
+    let totalTransferido = 0;
+
+    for (const reId of rec) {
+      for (const exId of exc) {
+        if (reId === exId) continue;
+        if (estado[reId].folga <= 0) break;
+        if (estado[exId].excedente <= 0) continue;
+        if (maxTotal !== undefined && totalTransferido >= maxTotal) break;
+
+        const mover = maxTotal !== undefined
+          ? Math.min(estado[reId].folga, estado[exId].excedente, maxTotal - totalTransferido)
+          : Math.min(estado[reId].folga, estado[exId].excedente);
+
+        if (mover <= 0) continue;
+
+        // origem = quem apoia (tem folga), destino = quem recebe apoio (tem excedente)
+        apoios.push({ origem: estado[reId].nome, destino: estado[exId].nome, qtd: mover });
+        estado[reId].folga -= mover;
+        estado[reId].pac += mover;
+        estado[exId].excedente -= mover;
+        estado[exId].pac -= mover;
+        totalTransferido += mover;
+      }
+    }
+    return totalTransferido;
+  }
+
+  const idsA = clinicasA.map(s => s.id);
+  const idsB = clinicasB.map(s => s.id);
+  const idsSemi = semiCrit.map(s => s.id);
+
+  // ── STEP 1: Semi-críticos equilibram entre si ──
+  transferir(idsSemi, idsSemi);
+
+  // ── STEP 2: Clínicas A apoiam Semi-Críticos ──
+  const excSemiApos1 = idsSemi.filter(id => estado[id] && estado[id].excedente > 0);
+  if (excSemiApos1.length > 0) transferir(idsA, idsSemi);
+
+  // ── STEP 3: Clínicas B apoiam Semi-Críticos ──
+  const excSemiApos2 = idsSemi.filter(id => estado[id] && estado[id].excedente > 0);
+  if (excSemiApos2.length > 0) transferir(idsB, idsSemi);
+
+  // ── STEP 4: UTIs apoiam Semi-Críticos (se ainda sobrar) ──
+  const excSemiFinal = idsSemi.reduce((t, id) => t + (estado[id] ? estado[id].excedente : 0), 0);
+  if (excSemiFinal > 0) {
+    const apoio8N  = Math.min(Math.ceil(excSemiFinal / 2),  uti8n  ? uti8n.apoio_max  : 0);
+    const apoioPAC = Math.min(Math.floor(excSemiFinal / 2), utipac ? utipac.apoio_max : 0);
+    if (apoioPAC > 0) {
+      apoios.push({ origem: 'UTI PAC', destino: 'Semi-Críticos', qtd: apoioPAC });
+      idsSemi.forEach(id => { if (estado[id]) estado[id].excedente = Math.max(0, estado[id].excedente - Math.floor(apoioPAC / idsSemi.length)); });
+    }
+    if (apoio8N > 0) {
+      apoios.push({ origem: 'UTI 8ºN', destino: 'Semi-Críticos', qtd: apoio8N });
+    }
+  }
+
+  // ── STEP 5: Clínicas A equilibram entre si ──
+  transferir(idsA, idsA);
+
+  // ── STEP 6: Clínicas B equilibram entre si ──
+  transferir(idsB, idsB);
+
+  // ── STEP 7: Cruzamento A ↔ B ──
+  const excARestante = idsA.reduce((t,id) => t+(estado[id]?estado[id].excedente:0),0);
+  const excBRestante = idsB.reduce((t,id) => t+(estado[id]?estado[id].excedente:0),0);
+
+  if (excARestante > 0) transferir(idsB, idsA); // B absorve excedente de A
+  if (excBRestante > 0) transferir(idsA, idsB); // A absorve excedente de B
+
+  // ── STEP 8: UTIs apoiam Clínicas (excedente restante) ──
+  const excClinicasFinal = [...idsA, ...idsB].reduce((t,id) => t+(estado[id]?estado[id].excedente:0), 0);
+
+  let pending = 0;
+  if (excClinicasFinal > 0 && (utipac || uti8n)) {
+    // Ímpar sempre vai para UTI 8ºN (maior capacidade)
+    let apoio8N  = uti8n  ? Math.min(Math.ceil(excClinicasFinal / 2),  uti8n.apoio_max)  : 0;
+    let apoioPAC = utipac ? Math.min(Math.floor(excClinicasFinal / 2), utipac.apoio_max) : 0;
+
+    // Distribuir PAC preferindo Clínicas B depois A
+    if (apoioPAC > 0) {
+      const ordem = [...idsB, ...idsA];
+      let rest = apoioPAC;
+      for (const id of ordem) {
+        if (!estado[id] || estado[id].excedente <= 0 || rest <= 0) continue;
+        const mover = Math.min(estado[id].excedente, rest);
+        apoios.push({ origem: 'UTI PAC', destino: estado[id].nome, qtd: mover });
+        estado[id].excedente -= mover;
+        rest -= mover;
+      }
+      pending += rest;
+    }
+
+    // Distribuir 8N preferindo Clínicas B depois A
+    if (apoio8N > 0) {
+      const ordem = [...idsB, ...idsA];
+      let rest = apoio8N;
+      for (const id of ordem) {
+        if (!estado[id] || estado[id].excedente <= 0 || rest <= 0) continue;
+        const mover = Math.min(estado[id].excedente, rest);
+        apoios.push({ origem: 'UTI 8ºN', destino: estado[id].nome, qtd: mover });
+        estado[id].excedente -= mover;
+        rest -= mover;
+      }
+      pending += rest;
+    }
+
+    // Excedente que sobrou após UTIs
+    pending += [...idsA, ...idsB].reduce((t,id) => t+(estado[id]?estado[id].excedente:0), 0);
+  }
+
+  // ── CÁLCULO DAS MÉDIAS (apenas para o coordenador) ──
+  // Média inicial: Clínicas A + B + Semi-críticos / fisios desses setores
+  const setoresMedia = TODOS.filter(s =>
+    s.tipo === 'clinica_a' || s.tipo === 'clinica_b' || s.tipo === 'semi_critico'
+  );
+  let pacMedia = 0, fisMedia = 0;
+  setoresMedia.forEach(s => {
+    const l = lancamentosCache[s.id];
+    if (l) {
+      pacMedia += l.prescritos;
+      fisMedia += [l.fisio1, l.fisio2, l.fisio3].filter(Boolean).length || 1;
+    }
+  });
+  const mediaInicial = fisMedia > 0 ? (pacMedia / fisMedia) : 0;
+
+  // Média recalculada: se a inicial > 10, inclui as UTIs dimensionáveis que apoiaram
+  let mediaRecalculada = null;
+  if (mediaInicial > LIMITE) {
+    let fisRecalc = fisMedia;
+    const utisQueApoiaram = new Set(apoios.filter(a => a.origem === 'UTI PAC' || a.origem === 'UTI 8ºN').map(a => a.origem));
+    utisQueApoiaram.forEach(nomeUti => {
+      const uti = TODOS.find(s => s.nome === nomeUti);
+      if (uti) {
+        const l = lancamentosCache[uti.id];
+        if (l) fisRecalc += [l.fisio1, l.fisio2, l.fisio3].filter(Boolean).length || 1;
+      }
+    });
+    mediaRecalculada = fisRecalc > 0 ? (pacMedia / fisRecalc) : 0;
+  }
+
+  const media = Math.round(mediaInicial);
+
+  // Redistribuição para baixo quando média < 10 e sem apoios
+  const redistBaixo = [];
+  if (media < LIMITE && apoios.length === 0) {
+    const comDados = noCalc.filter(s => lancamentosCache[s.id] && estado[s.id]);
+    const media2 = totalF > 0 ? totalP / totalF : 0;
+    comDados.sort((a,b) => (estado[b.id]?.pac||0) - (estado[a.id]?.pac||0));
+    for (const s of comDados) {
+      if (!estado[s.id] || estado[s.id].pac <= media2) continue;
+      for (const t of [...comDados].reverse()) {
+        if (t.id === s.id || !estado[t.id] || estado[t.id].pac >= media2) continue;
+        const mover = Math.min(
+          Math.floor(estado[s.id].pac - media2),
+          Math.floor(media2 - estado[t.id].pac)
+        );
+        if (mover > 0) redistBaixo.push({ origem: estado[s.id].nome, destino: estado[t.id].nome, qtd: mover });
+      }
+    }
+  }
+
+  // ── Montar HTML de resultado ──
+  const el = document.getElementById('c-dim-resultado');
+
+  let redistBaixoHtml = '';
+  if (redistBaixo.length > 0) {
+    const dirs = redistBaixo.map(r =>
+      `<div style="font-size:13px;padding:4px 0 4px 12px;border-left:2px solid rgba(255,255,255,0.2);margin:4px 0">
+        ➡️ <strong>${r.qtd}</strong> pac. de ${r.origem} → <strong>${r.destino}</strong></div>`
+    ).join('');
+    redistBaixoHtml = `<div class="apoio-item">⚖️ <strong>Equalização</strong> (turno com baixa demanda)${dirs}</div>`;
+  }
+
+  let apoiosHtml = '';
+  if (!apoios.length && !redistBaixo.length) {
+    apoiosHtml = `<div class="apoio-item">✅ Todos os setores dentro do limite. Sem necessidade de apoio.</div>`;
+  } else {
+    // Agrupar por origem para exibição
+    const porOrigem = {};
+    apoios.forEach(a => {
+      if (!porOrigem[a.origem]) porOrigem[a.origem] = [];
+      porOrigem[a.origem].push(a);
+    });
+    apoiosHtml = Object.entries(porOrigem).map(([origem, lista]) => {
+      const dirs = lista.map(a => {
+        const destino = a.destino || '';
+        const leitosInfo = a.leitos ? ` <span style="font-size:11px;color:rgba(255,255,255,0.7)">(leitos: ${a.leitos})</span>` : '';
+        return destino
+          ? `<div style="font-size:13px;padding:4px 0 4px 12px;border-left:2px solid rgba(255,255,255,0.2);margin:4px 0">➡️ <strong>${a.qtd}</strong> pac. no <strong>${destino}</strong>${leitosInfo}</div>`
+          : `<div style="font-size:13px;padding:4px 0 4px 12px;border-left:2px solid rgba(255,255,255,0.2);margin:4px 0">➡️ <strong>${a.qtd}</strong> paciente${a.qtd>1?'s':''}</div>`;
+      }).join('');
+      const total = lista.reduce((t,a) => t+a.qtd, 0);
+      return `<div class="apoio-item">📌 <strong>${origem}</strong> apoia ${total} paciente${total>1?'s':''}${dirs}</div>`;
+    }).join('');
+  }
+
+  const avisoHtml = pending > 0
+    ? `<div class="alerta-box">
+        ⚠️ <strong>${pending}</strong> paciente(s) sem cobertura após todos os apoios.<br><br>
+        📋 <strong>Pacientes com prescrição 1x/dia devem ser ajustados para atendimento à tarde.</strong><br>
+        Utilize pareceres bem indicados para otimizar o atendimento em dias de alta demanda.
+      </div>`
+    : '';
+
+  const fisiosHtml = `<div style="font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:10px">👥 ${totalFisiosInformados} fisioterapeuta${totalFisiosInformados!==1?'s':''} no turno</div>`;
+
+  el.innerHTML = `
+    <div class="resultado-box">
+      <div class="resultado-title">Dimensionamento · ${turnoLabel}</div>
+      ${fisiosHtml}
+      ${redistBaixoHtml}
+      ${apoiosHtml}
+      ${avisoHtml}
+    </div>
+    <div class="card">
+      <div class="card-title">Texto para WhatsApp</div>
+      <div class="texto-wpp" id="texto-wpp">${gerarTexto(apoios, media, turnoLabel, pending, redistBaixo)}</div>
+      <button class="btn-copy" onclick="copiarTexto()">📋 Copiar para WhatsApp</button>
+    </div>`;
+
+  const btnPublicar = `
+    <button class="btn-copy" style="background:var(--verde);margin-top:8px" id="btn-publicar" onclick="publicarDimensionamento(${JSON.stringify(apoios)}, ${media}, '${turnoLabel}', ${pending})">
+      📢 Publicar para fisioterapeutas
+    </button>
+    <div id="status-publicacao" style="margin-top:6px"></div>
+    <div class="card" style="margin-top:12px">
+      <div class="card-title">Confirmações de leitura</div>
+      <div id="painel-leituras"><div class="empty-state" style="padding:16px">Publique para ver as confirmações.</div></div>
+    </div>`;
+  el.innerHTML += btnPublicar;
+  atualizarLeituras();
+  setInterval(atualizarLeituras, 30000);
+  salvarHistorico(apoios, media, turnoLabel, pending, mediaInicial, mediaRecalculada);
+};
+
+window.publicarDimensionamento = async (apoios, media, turnoLabel, excedente) => {
+  const btnPub = document.getElementById('btn-publicar');
+  if (btnPub) { btnPub.textContent = '⏳ Publicando...'; btnPub.disabled = true; }
+  const turno = Object.values(lancamentosCache)[0]?.turno || getTurnoAtual();
+  const apoiosHtml = apoios.length
+    ? apoios.map(a => `<div class="apoio-item">📌 ${a.origem} apoia com <strong>${a.qtd}</strong> paciente${a.qtd>1?'s':''}</div>`).join('')
+    : '';
+  const texto = gerarTexto(apoios, media, turnoLabel, excedente);
+  try {
+    await setDoc(doc(db, 'dimensionamento_publicado', `${getHoje()}_${turno}`), {
+      turno, turnoLabel, apoiosHtml, media, excedente, texto,
+      publicadoPor: auth.currentUser.email,
+      timestamp: Date.now()
+    });
+    const stEl = document.getElementById('status-publicacao');
+    if (stEl) stEl.innerHTML = '<div style="background:#e6f5ec;border:1.5px solid var(--ok);border-radius:10px;padding:14px;text-align:center;margin-top:10px"><div style="font-size:24px">✅</div><div style="font-weight:700;color:var(--ok);font-size:15px">Publicado com sucesso!</div><div style="font-size:12px;color:var(--texto-soft);margin-top:4px">Todos os fisioterapeutas já podem visualizar.</div></div>';
+    const btnP = document.getElementById('btn-publicar');
+    if (btnP) { btnP.textContent = '✅ Publicado'; btnP.style.background = 'var(--ok)'; }
+    toast('✅ Dimensionamento publicado para todos.');
+  } catch(e) {
+    const btnPErr = document.getElementById('btn-publicar');
+    if (btnPErr) { btnPErr.textContent = '📢 Publicar para fisioterapeutas'; btnPErr.disabled = false; }
+    toast('⚠️ Erro ao publicar. Verifique a conexão.');
+  }
+};
+
+function gerarTexto(apoios, media, turno, excedente, redistBaixo) {
+  let txt = `*Dimensionamento - ${turno}*\n\n`;
+
+  // Redistribuição para baixo (média < 10)
+  if (redistBaixo && redistBaixo.length > 0) {
+    txt += `⚖️ *Equalização de carga (turno com baixa demanda):*\n`;
+    redistBaixo.forEach(r => {
+      txt += `• ${r.origem} ➡️ ${r.qtd} pac. → ${r.destino}\n`;
+    });
+    txt += `\n`;
+  }
+
+  if (apoios.length) {
+    // Agrupar por origem para evitar repetições
+    const porOrigem = {};
+    apoios.forEach(a => {
+      if (!porOrigem[a.origem]) porOrigem[a.origem] = [];
+      porOrigem[a.origem].push(a);
+    });
+
+    Object.entries(porOrigem).forEach(([origem, lista]) => {
+      lista.forEach(a => {
+        const destino = a.destino || '';
+        const leitosInfo = a.leitos ? ` (leitos: ${a.leitos})` : '';
+        if (destino) {
+          txt += `• ${origem} ➡️ ${a.qtd} no ${destino}${leitosInfo}\n`;
+        } else {
+          txt += `• ${origem} ➡️ ${a.qtd} paciente${a.qtd>1?'s':''}\n`;
+        }
+      });
+    });
+
+    if (excedente > 0) {
+      txt += `\n⚠️ ${excedente} paciente(s) sem cobertura.`;
+      txt += `\n📋 Pacientes com prescrição 1x/dia devem ser ajustados para atendimento à tarde.\n`;
+    }
+  } else {
+    txt += `✅ Sem necessidade de apoio neste turno.\n`;
+  }
+  txt += `\n_Dimensionamento gerado automaticamente · Coordenação de Fisioterapia HRU_`;
+  txt += `\nBom plantão! 🏥`;
+  return txt;
+}
+
+window.copiarTexto = () => {
+  const txt = document.getElementById('texto-wpp')?.textContent || '';
+  navigator.clipboard.writeText(txt).then(()=>toast('✅ Copiado!')).catch(()=>toast('Selecione o texto manualmente.'));
+};
+
+// =====================
+// EDITAR (CHEFE)
+// =====================
+window.abrirModalEditar = () => {
+  const sel = document.getElementById('edit-setor');
+  sel.innerHTML = '<option value="">Selecione o setor</option>';
+  // Mostrar todos os setores que têm lançamento no cache
+  Object.entries(lancamentosCache).forEach(([setorId, l]) => {
+    const s = getSetor(setorId);
+    if (!s) return;
+    const opt = document.createElement('option');
+    opt.value = setorId;
+    opt.textContent = `${s.nome} (${l.prescritos} prescritos)`;
+    sel.appendChild(opt);
+  });
+  if (sel.options.length <= 1) { toast('Nenhum lançamento para editar.'); return; }
+  // Limpar campos
+  document.getElementById('edit-n1').value = '';
+  document.getElementById('edit-n2').value = '';
+  document.getElementById('edit-n3').value = '';
+  document.getElementById('edit-prescritos').value = '';
+  abrirModal('modal-editar');
+};
+
+window.preencherEdicao = () => {
+  const setorId = document.getElementById('edit-setor').value;
+  if (!setorId || !lancamentosCache[setorId]) return;
+  const l = lancamentosCache[setorId];
+  document.getElementById('edit-n1').value = l.fisio1 || '';
+  document.getElementById('edit-n2').value = l.fisio2 || '';
+  document.getElementById('edit-n3').value = l.fisio3 || '';
+  document.getElementById('edit-prescritos').value = l.prescritos || '';
+};
+
+window.salvarEdicao = async () => {
+  const setorId = document.getElementById('edit-setor').value;
+  const novoP = parseInt(document.getElementById('edit-prescritos').value);
+  const n1 = document.getElementById('edit-n1').value.trim();
+
+  if (!setorId) { toast('Selecione o setor.'); return; }
+  if (!n1) { toast('Informe ao menos o 1º fisioterapeuta.'); return; }
+  if (isNaN(novoP) || novoP < 0) { toast('Informe um número válido de prescritos.'); return; }
+
+  try {
+    // Buscar o documento pelo ID exato (formato: YYYY-MM-DD_turno_setorId)
+    const turnoLanc = lancamentosCache[setorId]?.turno || getTurnoAtual();
+    const dataLanc = lancamentosCache[setorId]?.data || getHoje();
+    const docId = `${dataLanc}_${turnoLanc}_${setorId}`;
+    const ref = doc(db, 'lancamentos', docId);
+    const snap = await getDoc(ref);
+
+    if (snap.exists()) {
+      await setDoc(ref, {
+        ...snap.data(),
+        fisio1: n1,
+        fisio2: document.getElementById('edit-n2').value.trim() || null,
+        fisio3: document.getElementById('edit-n3').value.trim() || null,
+        prescritos: novoP,
+        editadoPor: auth.currentUser.email,
+        editadoEm: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})
+      }, { merge: true });
+
+      fecharModal('modal-editar');
+      await carregarLancamentos();
+      toast('✅ Lançamento atualizado com sucesso!');
+    } else {
+      toast('⚠️ Documento não encontrado. Tente atualizar os lançamentos primeiro.');
+    }
+  } catch(e) {
+    console.error('Erro ao salvar edição:', e);
+    toast('⚠️ Erro ao salvar: ' + e.message);
+  }
+};
+
+// =====================
+// RESET
+// =====================
+window.confirmarReset = (t) => {
+  resetTarget = t;
+  // Pré-selecionar o turno atual
+  const sel = document.getElementById('reset-turno-select');
+  if (sel) sel.value = getTurnoAtual();
+  abrirModal('modal-reset');
+};
+window.executarReset = async () => {
+  const sel = document.getElementById('reset-turno-select');
+  const turno = sel ? sel.value : getTurnoAtual();
+  fecharModal('modal-reset');
+  toast('⏳ Zerando turno ' + turno + '...');
+
+  try {
+    // Buscar por turno sem filtrar data — apaga qualquer lançamento desse turno
+    const q = query(
+      collection(db, 'lancamentos'),
+      where('turno', '==', turno)
+    );
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+      toast('ℹ️ Nenhum lançamento encontrado para o turno ' + turno + '.');
+      return;
+    }
+
+    const deletes = snap.docs.map(d => deleteDoc(d.ref));
+    await Promise.all(deletes);
+
+    // Apagar dimensionamentos publicados de qualquer data para esse turno
+    const qDim = query(
+      collection(db, 'dimensionamento_publicado'),
+      where('turno', '==', turno)
+    );
+    const snapDim = await getDocs(qDim);
+    const deletesDim = snapDim.docs.map(d => deleteDoc(d.ref));
+    await Promise.all(deletesDim);
+
+    // Limpar cache local
+    lancamentosCache = {};
+
+    // Atualizar interface
+    renderLancamentos('c-lancamentos');
+    renderLancamentos('coord-lancamentos');
+    renderCobertura();
+    atualizarStats();
+
+    toast(`✅ Turno ${turno} zerado — ${snap.docs.length} lançamento(s) removido(s).`);
+  } catch(e) {
+    console.error('Erro no reset:', e);
+    toast('⚠️ Erro ao zerar: ' + e.message);
+  }
+};
+
+// =====================
+// COORDENAÇÃO
+// =====================
+window.renderCoordHoje = async () => {
+  renderLancamentos('coord-lancamentos');
+  atualizarStats();
+  await renderMediasCoord();
+};
+
+async function renderMediasCoord() {
+  const card = document.getElementById('card-medias-coord');
+  const el = document.getElementById('coord-medias');
+  if (!card || !el) return;
+
+  // Buscar o dimensionamento mais recente do dia no histórico
+  try {
+    const turno = Object.values(lancamentosCache)[0]?.turno || getTurnoAtual();
+    const q = query(collection(db, 'historico'),
+      where('data', '==', getHoje()),
+      where('turno', '==', turno));
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+      card.style.display = 'none';
+      return;
+    }
+
+    // Pegar o mais recente
+    let maisRecente = null;
+    snap.forEach(d => {
+      const dado = d.data();
+      if (!maisRecente || dado.timestamp > maisRecente.timestamp) maisRecente = dado;
+    });
+
+    if (!maisRecente || maisRecente.mediaInicial === null || maisRecente.mediaInicial === undefined) {
+      card.style.display = 'none';
+      return;
+    }
+
+    const labels = {manha:'Manhã', tarde:'Tarde', noite:'SN'};
+    let html = `<div style="font-size:11px;color:var(--texto-soft);margin-bottom:10px">Turno: ${labels[turno] || turno} · informação exclusiva da coordenação</div>`;
+
+    html += `<div class="stat-grid">`;
+    html += `<div class="stat-card"><div class="stat-num" style="color:${maisRecente.mediaInicial > 10 ? 'var(--erro)' : 'var(--ok)'}">${maisRecente.mediaInicial}</div><div class="stat-label">Média inicial<br>(clínicas + semi)</div></div>`;
+    if (maisRecente.mediaRecalculada !== null && maisRecente.mediaRecalculada !== undefined) {
+      html += `<div class="stat-card"><div class="stat-num" style="color:var(--verde)">${maisRecente.mediaRecalculada}</div><div class="stat-label">Média final<br>(com UTIs)</div></div>`;
+    }
+    html += `</div>`;
+
+    if (maisRecente.mediaInicial > 10) {
+      html += `<div style="font-size:12px;color:var(--alerta);margin-top:10px;padding:10px;background:#fff8f0;border-radius:8px">⚠️ Média inicial acima de 10 — UTIs dimensionáveis foram acionadas neste turno.</div>`;
+    }
+
+    el.innerHTML = html;
+    card.style.display = 'block';
+  } catch(e) {
+    card.style.display = 'none';
+  }
+}
+
+// =====================
+// HISTÓRICO
+// =====================
+async function salvarHistorico(apoios, media, turno, excedente, mediaInicial, mediaRecalculada) {
+  // Calcular totalPrescritos das enfermarias e teto dinâmico
+  const enfermarias = TODOS.filter(s => s.tipo === 'clinica_a' || s.tipo === 'clinica_b');
+  let totalPrescritos = 0;
+  let fisiosEnfCount = 0;
+  const fisiosNomes = [];
+
+  TODOS.filter(s => s.tipo !== 'critico_fechado').forEach(s => {
+    const l = lancamentosCache[s.id];
+    if (!l) return;
+    totalPrescritos += l.prescritos || 0;
+    const nomes = [l.fisio1, l.fisio2, l.fisio3].filter(Boolean);
+    nomes.forEach(n => { if (!fisiosNomes.includes(n)) fisiosNomes.push(n); });
+    if (s.tipo === 'enfermaria') fisiosEnfCount += nomes.length;
+  });
+
+  const tetoEnfermarias = fisiosEnfCount * 10;
+  const id = `${getHoje()}_${turno}_${Date.now()}`;
+
+  await setDoc(doc(db,'historico',id), {
+    data: getHoje(),
+    turno,
+    apoios,
+    media,
+    mediaInicial: mediaInicial !== undefined ? Math.round(mediaInicial * 10) / 10 : null,
+    mediaRecalculada: mediaRecalculada !== null && mediaRecalculada !== undefined ? Math.round(mediaRecalculada * 10) / 10 : null,
+    excedente,
+    totalPrescritos,
+    tetoEnfermarias,
+    fisiosNomes,
+    timestamp: Date.now()
+  });
+}
+
+async function renderHistorico() {
+  // Gráfico de linha do tempo
+  await renderGraficoLinha();
+  await renderAdesao();
+}
+
+async function renderGraficoLinha() {
+  const el = document.getElementById('coord-grafico-linha');
+  if (!el) return;
+
+  const mesAtual = new Date().toISOString().slice(0,7); // YYYY-MM
+  const q = query(collection(db,'historico'), orderBy('timestamp','asc'));
+  const snap = await getDocs(q);
+
+  // Agrupar por data (soma dos prescritos do dia e teto dinâmico)
+  const porDia = {};
+  snap.forEach(d => {
+    const r = d.data();
+    if (!r.data || !r.data.startsWith(mesAtual)) return;
+    if (!porDia[r.data]) porDia[r.data] = { totalPrescritos: 0, teto: 0, count: 0 };
+    porDia[r.data].totalPrescritos += r.totalPrescritos || 0;
+    porDia[r.data].teto = Math.max(porDia[r.data].teto, r.tetoEnfermarias || 0);
+    porDia[r.data].count++;
+  });
+
+  const dias = Object.keys(porDia).sort();
+  if (!dias.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div>Sem dados este mês ainda.</div>';
+    return;
+  }
+
+  const maxVal = Math.max(...dias.map(d => Math.max(porDia[d].totalPrescritos, porDia[d].teto))) * 1.1;
+  const barW = 28, gap = 6, chartH = 180, labelH = 30;
+  const totalW = Math.max(300, dias.length * (barW + gap) + 40);
+
+  let svg = `<svg width="${totalW}" height="${chartH + labelH}" style="display:block">`;
+
+  // Barras
+  dias.forEach((dia, i) => {
+    const x = 20 + i * (barW + gap);
+    const val = porDia[dia].totalPrescritos;
+    const teto = porDia[dia].teto;
+    const barH = Math.round((val / maxVal) * chartH);
+    const tetoY = Math.round(chartH - (teto / maxVal) * chartH);
+    const cor = val > teto ? '#e67e22' : '#2d6e47';
+    const diaNum = dia.slice(8);
+
+    svg += `<rect x="${x}" y="${chartH - barH}" width="${barW}" height="${barH}" fill="${cor}" rx="4" opacity="0.85"/>`;
+    svg += `<text x="${x + barW/2}" y="${chartH + 18}" text-anchor="middle" font-size="10" fill="#888">${diaNum}</text>`;
+    svg += `<text x="${x + barW/2}" y="${chartH - barH - 4}" text-anchor="middle" font-size="9" fill="${cor}" font-weight="600">${val}</text>`;
+
+    // Linha de teto (segmento)
+    if (i < dias.length - 1) {
+      const x2 = 20 + (i+1) * (barW + gap) + barW/2;
+      svg += `<line x1="${x + barW/2}" y1="${tetoY}" x2="${x2}" y2="${tetoY}" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="3,2"/>`;
+    }
+    svg += `<circle cx="${x + barW/2}" cy="${tetoY}" r="3" fill="#e74c3c"/>`;
+  });
+
+  svg += `</svg>`;
+  svg += `<div style="display:flex;gap:16px;margin-top:8px;font-size:11px;color:var(--texto-soft)">
+    <span><span style="display:inline-block;width:12px;height:12px;background:#2d6e47;border-radius:2px;margin-right:4px"></span>Dentro do teto</span>
+    <span><span style="display:inline-block;width:12px;height:12px;background:#e67e22;border-radius:2px;margin-right:4px"></span>Ultrapassou teto</span>
+    <span style="color:#e74c3c">--- Teto dinâmico</span>
+  </div>`;
+
+  el.innerHTML = svg;
+}
+
+async function renderAdesao() {
+  const el = document.getElementById('coord-adesao');
+  if (!el) return;
+  const mesAtual = new Date().toISOString().slice(0,7);
+  const q = query(collection(db,'historico'), orderBy('timestamp','desc'));
+  const snap = await getDocs(q);
+
+  const adesao = {};
+  snap.forEach(d => {
+    const r = d.data();
+    if (!r.data || !r.data.startsWith(mesAtual)) return;
+    if (!r.fisiosNomes) return;
+    r.fisiosNomes.forEach(nome => {
+      adesao[nome] = (adesao[nome] || 0) + 1;
+    });
+  });
+
+  if (!Object.keys(adesao).length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div>Sem dados de adesão ainda.</div>';
+    return;
+  }
+
+  const sorted = Object.entries(adesao).sort((a,b) => b[1]-a[1]);
+  const max = sorted[0][1];
+  let html = '';
+  sorted.forEach(([nome, qtd]) => {
+    const pct = Math.round((qtd/max)*100);
+    html += `<div class="chart-bar-wrap">
+      <div class="chart-bar-label"><span>${nome}</span><span>${qtd} turno${qtd>1?'s':''}</span></div>
+      <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+// =====================
+// INDICADORES (mensal, zera a cada novo mês)
+// =====================
+async function renderGraficos() {
+  const el = document.getElementById('coord-graficos');
+  const el2 = document.getElementById('coord-grafico-dias');
+  if (!el) return;
+  el.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
+
+  const mesAtual = new Date().toISOString().slice(0,7); // YYYY-MM
+
+  // Buscar apenas registros do mês atual
+  const q = query(collection(db,'historico'), orderBy('timestamp','desc'));
+  const snap = await getDocs(q);
+
+  const contadores = {};
+  const diasComApoioSet = new Set();
+  const diasSemApoioSet = new Set();
+
+  snap.forEach(d => {
+    const r = d.data();
+    if (!r.data || !r.data.startsWith(mesAtual)) return;
+    if (r.apoios && r.apoios.length) {
+      diasComApoioSet.add(r.data);
+      r.apoios.forEach(a => {
+        contadores[a.origem] = (contadores[a.origem] || 0) + a.qtd;
+      });
+    } else {
+      diasSemApoioSet.add(r.data);
+    }
+  });
+
+  // Dias que tiveram pelo menos um turno com apoio
+  const diasComApoio = diasComApoioSet.size;
+  // Dias sem nenhum turno com apoio
+  const diasSemApoio = [...diasSemApoioSet].filter(d => !diasComApoioSet.has(d)).length;
+  const total = diasComApoio + diasSemApoio;
+  const pctApoio = total > 0 ? Math.round((diasComApoio/total)*100) : 0;
+
+  // Card de resumo
+  if (el2) {
+    el2.innerHTML = `
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-num" style="color:var(--erro)">${diasComApoio}</div><div class="stat-label">Dias com apoio</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:var(--ok)">${diasSemApoio}</div><div class="stat-label">Dias sem apoio</div></div>
+        <div class="stat-card"><div class="stat-num">${pctApoio}%</div><div class="stat-label">Taxa de acionamento</div></div>
+      </div>`;
+  }
+
+  // Apoios por setor
+  if (!Object.keys(contadores).length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div>Nenhum apoio registrado este mês.</div>';
+    return;
+  }
+
+  const max = Math.max(...Object.values(contadores));
+  let html = '<div style="font-size:11px;color:var(--texto-soft);margin-bottom:12px">Pacientes cedidos por unidade de apoio — mês atual</div>';
+  Object.entries(contadores).sort((a,b) => b[1]-a[1]).forEach(([setor, qtd]) => {
+    const pct = Math.round((qtd/max)*100);
+    const cls = pct > 66 ? 'alerta' : pct > 33 ? '' : 'ok';
+    html += `<div class="chart-bar-wrap">
+      <div class="chart-bar-label"><span>${setor}</span><span>${qtd} pacientes cedidos</span></div>
+      <div class="chart-bar-bg"><div class="chart-bar-fill ${cls}" style="width:${pct}%"></div></div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+// Popular select setores (fisio form)
+popularSetores();
+
+// =====================
+// RESET AUTOMÁTICO E MANUAL
+// =====================
+
+// Mapeia horário → turno que deve ser zerado
+const RESET_SCHEDULE = [
+  { h: 5,  m: 0,  turno: 'noite',  id: 'reset_0500' }, // zera SN da noite anterior
+  { h: 12, m: 0,  turno: 'manha',  id: 'reset_1200' }, // zera manhã
+  { h: 17, m: 40, turno: 'tarde',  id: 'reset_1740' }, // zera tarde
+];
+
+async function resetarTurno(turno, data) {
+  try {
+    // Buscar por turno sem filtrar data
+    const q = query(
+      collection(db, 'lancamentos'),
+      where('turno', '==', turno)
+    );
+    const snap = await getDocs(q);
+    for (const d of snap.docs) await deleteDoc(d.ref);
+
+    // Apaga dimensionamentos publicados desse turno
+    try {
+      const qDim = query(collection(db, 'dimensionamento_publicado'), where('turno', '==', turno));
+      const snapDim = await getDocs(qDim);
+      for (const d of snapDim.docs) await deleteDoc(d.ref);
+    } catch(e) {}
+
+    lancamentosCache = {};
+    console.log(`Reset executado: turno=${turno} data=${dataAlvo}`);
+    return true;
+  } catch(e) {
+    console.error('Erro no reset:', e);
+    return false;
+  }
+}
+
+function getOntem() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
+async function verificarResetAutomatico() {
+  const agora = new Date();
+  const h = agora.getHours();
+  const m = agora.getMinutes();
+  const totalAtual = h * 60 + m;
+
+  for (const slot of RESET_SCHEDULE) {
+    const totalSlot = slot.h * 60 + slot.m;
+    // Janela de 4 minutos após o horário programado
+    if (totalAtual < totalSlot || totalAtual >= totalSlot + 4) continue;
+
+    // Chave única por dia e slot para não repetir
+    const chave = `reset_${getHoje()}_${slot.id}`;
+    if (localStorage.getItem(chave)) continue;
+
+    // Para reset das 05h, zera o SN do dia anterior
+    const dataAlvo = slot.id === 'reset_0500' ? getOntem() : getHoje();
+    const ok = await resetarTurno(slot.turno, dataAlvo);
+    if (ok) {
+      localStorage.setItem(chave, '1');
+      toast(`♻️ Turno ${slot.turno} zerado automaticamente.`);
+    }
+  }
+}
+
+// Verificar a cada minuto
+setInterval(verificarResetAutomatico, 60000);
+verificarResetAutomatico();
+
+// =====================
+// ITEM 7: Lógica SN — ocultar alerta de pendência nas enfermarias
+// =====================
+function isPendenteSN(setorId) {
+  // No turno SN clínicas não são pendentes
+  if (getTurnoAtual() !== 'noite') return true;
+  const s = getSetor(setorId);
+  return s && s.tipo !== 'clinica_a' && s.tipo !== 'clinica_b';
+}
+
+// =====================
+// ITEM 8: Mostrar campo leitos quando turno = SN e setor = enfermaria
+// =====================
+function atualizarCampoLeitos() {
+  const setorId = document.getElementById('fisio-setor').value;
+  const grupoLeitos = document.getElementById('grupo-leitos');
+  if (!grupoLeitos) return;
+  const s = getSetor(setorId);
+  const isSN = turnoSelecionado === 'noite';
+  const isClinica = s && (s.tipo === 'clinica_a' || s.tipo === 'clinica_b');
+  grupoLeitos.style.display = (isSN && isClinica) ? 'block' : 'none';
+}
+
+// =====================
+// ABAS FISIO
+// =====================
+// =====================
+// DIAGNÓSTICO (temporário)
+// =====================
+window.diagnosticarFirebase = async () => {
+  try {
+    const hoje = getHoje();
+    // Buscar TODOS os lançamentos de hoje sem filtrar turno
+    const q = query(collection(db, 'lancamentos'), where('data', '==', hoje));
+    const snap = await getDocs(q);
+    if (snap.empty) {
+      alert('Firebase: NENHUM documento encontrado para hoje (' + hoje + ')');
+      return;
+    }
+    let info = `Firebase — documentos para ${hoje}:\n\n`;
+    snap.forEach(d => {
+      const dado = d.data();
+      info += `ID: ${d.id}\nTurno: "${dado.turno}" | Setor: ${dado.setorId} | Prescritos: ${dado.prescritos}\n\n`;
+    });
+    alert(info);
+  } catch(e) {
+    alert('Erro no diagnóstico: ' + e.message);
+  }
+};
+
+// =====================
+// LEITURAS
+// =====================
+async function atualizarLeituras() {
+  const el = document.getElementById('painel-leituras');
+  if (!el) return;
+  const turno = getTurnoAtual();
+  const ref = doc(db, 'dimensionamento_publicado', `${getHoje()}_${turno}`);
+  try {
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+    const leituras = snap.data().leituras || [];
+    if (!leituras.length) {
+      el.innerHTML = '<div style="font-size:13px;color:#bbb;text-align:center;padding:10px">Nenhuma confirmação ainda.</div>';
+      return;
+    }
+    el.innerHTML = leituras.map(email =>
+      `<div class="escala-item">
+        <div class="escala-fisios">✅ ${email}</div>
+      </div>`
+    ).join('');
+  } catch(e) {}
+}
+
+window.mudarTabFisio = (tab) => {
+  const tabs = ['informar','escala','dimensionamento'];
+  document.querySelectorAll('#view-fisio .tab').forEach((t,i) => {
+    t.classList.toggle('active', tabs[i] === tab);
+  });
+  document.querySelectorAll('#view-fisio .tab-content').forEach(tc => tc.classList.remove('active'));
+  document.getElementById(`fisio-tab-${tab}`).classList.add('active');
+
+  if (tab === 'escala') {
+    carregarLancamentos().then(() => renderEscala('fisio-escala-lista'));
+  }
+  if (tab === 'dimensionamento') {
+    carregarDimPublicado();
+  }
+};
+
+// =====================
+// DIMENSIONAMENTO PUBLICADO (para fisios verem)
+// =====================
+async function carregarDimPublicado() {
+  const el = document.getElementById('fisio-dim-conteudo');
+  const elLeitura = document.getElementById('fisio-dim-leitura');
+  const elStatus = document.getElementById('fisio-leitura-status');
+  if (!el) return;
+  el.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Aguardando dimensionamento...</div>';
+  try {
+    const turno = getTurnoAtual();
+    const ref = doc(db, 'dimensionamento_publicado', `${getHoje()}_${turno}`);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      const d = snap.data();
+      el.innerHTML = `
+        <div class="resultado-box">
+          <div class="resultado-title">Dimensionamento · ${d.turnoLabel}</div>
+          ${d.apoiosHtml || '<div class="apoio-item">✅ Sem necessidade de apoio.</div>'}
+        </div>
+        <div class="card">
+          <div class="card-title">Mensagem do dimensionamento</div>
+          <div class="texto-wpp">${d.texto}</div>
+        </div>`;
+
+      // Verificar se já leu
+      if (elLeitura) elLeitura.style.display = 'block';
+      const user = auth.currentUser;
+      const leituras = d.leituras || [];
+      if (user && leituras.includes(user.email)) {
+        if (elLeitura) elLeitura.style.display = 'none';
+        if (elStatus) { elStatus.style.display = 'block'; elStatus.textContent = '✅ Você já confirmou a leitura.'; }
+      }
+    } else {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div>O dimensionamento ainda não foi publicado pelo chefe de plantão.</div>';
+      if (elLeitura) elLeitura.style.display = 'none';
+    }
+  } catch(e) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div>Erro ao carregar. Verifique a conexão.</div>';
+  }
+}
+
+window.marcarComoLido = async () => {
+  const user = auth.currentUser;
+  if (!user) return;
+  const turno = getTurnoAtual();
+  const ref = doc(db, 'dimensionamento_publicado', `${getHoje()}_${turno}`);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+  const d = snap.data();
+  const leituras = d.leituras || [];
+  if (!leituras.includes(user.email)) leituras.push(user.email);
+  await setDoc(ref, { ...d, leituras }, { merge: true });
+  const elLeitura = document.getElementById('fisio-dim-leitura');
+  const elStatus = document.getElementById('fisio-leitura-status');
+  if (elLeitura) elLeitura.style.display = 'none';
+  if (elStatus) { elStatus.style.display = 'block'; elStatus.textContent = '✅ Leitura confirmada!'; }
+  toast('✅ Leitura confirmada!');
+};
+
+</script>
+</body>
+</html>
